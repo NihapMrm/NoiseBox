@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { TopBar } from './components/TopBar'
 import { Canvas } from './components/Canvas'
+import { OrbitCanvas } from './components/OrbitCanvas'
 import { BottomBar } from './components/BottomBar'
 import { useAudio } from './hooks/useAudio'
 import { usePresetStore } from './store/presetStore'
@@ -31,6 +32,7 @@ export default function App() {
   const setFreesoundApiKey = useSettingsStore((s) => s.setFreesoundApiKey)
   const setPixabayApiKey = useSettingsStore((s) => s.setPixabayApiKey)
   const setAllDownloaded = useDownloadedSoundsStore((s) => s.setAll)
+  const playgroundMode = useSettingsStore((s) => s.playgroundMode)
 
   useEffect(() => {
     async function init() {
@@ -75,7 +77,7 @@ export default function App() {
         fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
       }}
     >
-      <Canvas />
+      {playgroundMode === 'orbit' ? <OrbitCanvas /> : <Canvas />}
       <TopBar />
       <BottomBar />
     </div>

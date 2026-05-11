@@ -10,6 +10,7 @@ import { BUILT_IN_SOUNDS } from '../audio/sounds'
 import { useSoundStore } from '../store/soundStore'
 import { useSettingsStore } from '../store/settingsStore'
 import { useDownloadStore } from '../store/downloadStore'
+import { ORBIT_BUBBLE_D } from './OrbitCanvas'
 import { useDownloadedSoundsStore, DownloadedSound } from '../store/downloadedSoundsStore'
 import { ensureSoundCached } from '../lib/audioDownloader'
 import { usePreview } from '../hooks/usePreview'
@@ -18,6 +19,16 @@ import { ApiKeysModal } from './ApiKeysModal'
 import { invoke } from '@tauri-apps/api/core'
 
 const downloadsStore = new LazyStore('downloads.json')
+
+function orbitStartPos(): { x: number; y: number } {
+  const r = ORBIT_BUBBLE_D / 2
+  const angle = Math.random() * Math.PI * 2
+  const offset = 20 + Math.random() * 20
+  return {
+    x: window.innerWidth  / 2 + Math.cos(angle) * offset - r,
+    y: window.innerHeight / 2 + Math.sin(angle) * offset - r,
+  }
+}
 
 const ICON_MAP: Record<string, React.ElementType> = {
   CloudRain, Zap, Feather, Wind, Flame, Coffee, Waves, Trees,
@@ -89,6 +100,7 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
   const updateSoundSrc = useSoundStore((s) => s.updateSoundSrc)
   const freesoundApiKey = useSettingsStore((s) => s.freesoundApiKey)
   const pixabayApiKey = useSettingsStore((s) => s.pixabayApiKey)
+  const playgroundMode = useSettingsStore((s) => s.playgroundMode)
   const { setStatus, getStatus } = useDownloadStore()
   const downloadedSounds = useDownloadedSoundsStore((s) => s.downloaded)
   const addDownloaded = useDownloadedSoundsStore((s) => s.add)
@@ -162,7 +174,8 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
         } catch { /* ignore */ }
       }
     }
-    const newSound: ActiveSound = { ...soundDef, src: initialSrc, vol: 75, active: false, x: 80 + Math.random() * 180, y: 80 + Math.random() * 120 }
+    const pos = playgroundMode === 'orbit' ? orbitStartPos() : { x: 80 + Math.random() * 180, y: 80 + Math.random() * 120 }
+    const newSound: ActiveSound = { ...soundDef, src: initialSrc, vol: 100, active: false, ...pos }
     addSound(newSound)
     if (initialSrc) { setStatus(soundDef.id, 'ready'); useSoundStore.getState().toggleSound(soundDef.id); return }
     setStatus(soundDef.id, 'downloading')
@@ -180,7 +193,8 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
     const soundDef = hitToSoundDef(hit)
     if (activeIds.has(soundDef.id)) return
     stopPreview()
-    const newSound: ActiveSound = { ...soundDef, src: '', vol: 75, active: false, x: 80 + Math.random() * 180, y: 80 + Math.random() * 120 }
+    const pos2 = playgroundMode === 'orbit' ? orbitStartPos() : { x: 80 + Math.random() * 180, y: 80 + Math.random() * 120 }
+    const newSound: ActiveSound = { ...soundDef, src: '', vol: playgroundMode === 'orbit' ? 100 : 75, active: false, ...pos2 }
     addSound(newSound)
     setStatus(soundDef.id, 'downloading')
     try {
@@ -201,7 +215,8 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
   function handleAddDownloaded(sound: DownloadedSound) {
     if (activeIds.has(sound.id)) return
     stopPreview()
-    const newSound: ActiveSound = { ...sound, vol: 75, active: false, x: 80 + Math.random() * 180, y: 80 + Math.random() * 120 }
+    const pos3 = playgroundMode === 'orbit' ? orbitStartPos() : { x: 80 + Math.random() * 180, y: 80 + Math.random() * 120 }
+    const newSound: ActiveSound = { ...sound, vol: playgroundMode === 'orbit' ? 100 : 75, active: false, ...pos3 }
     addSound(newSound)
     setStatus(sound.id, 'ready')
     useSoundStore.getState().toggleSound(sound.id)

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { Radio, Clock, Play, Pause, Key, MoreHorizontal, Plus } from 'lucide-react'
+import { Radio, Clock, Play, Pause, Key, MoreHorizontal, Plus, Circle, Grid3X3 } from 'lucide-react'
 import { usePresetStore } from '../store/presetStore'
 import { useSettingsStore } from '../store/settingsStore'
 import { useSoundStore } from '../store/soundStore'
@@ -66,6 +66,8 @@ export function TopBar() {
   const timerMode = useSettingsStore((s) => s.timerMode)
   const freesoundApiKey = useSettingsStore((s) => s.freesoundApiKey)
   const pixabayApiKey = useSettingsStore((s) => s.pixabayApiKey)
+  const playgroundMode = useSettingsStore((s) => s.playgroundMode)
+  const setPlaygroundMode = useSettingsStore((s) => s.setPlaygroundMode)
   const noKeys = !freesoundApiKey && !pixabayApiKey
 
   const visiblePresets = presets.slice(0, VISIBLE_COUNT)
@@ -341,6 +343,22 @@ export function TopBar() {
 
         {/* Right controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+          {/* Playground mode toggle */}
+          <button
+            onClick={() => setPlaygroundMode(playgroundMode === 'classic' ? 'orbit' : 'classic')}
+            title={playgroundMode === 'classic' ? 'Switch to Orbit playground' : 'Switch to Classic playground'}
+            style={{
+              width: '30px', height: '30px', borderRadius: '8px',
+              border: `0.5px solid ${playgroundMode === 'orbit' ? '#7c6af7' : 'rgba(255,255,255,0.08)'}`,
+              backgroundColor: playgroundMode === 'orbit' ? '#2d2540' : 'transparent',
+              color: playgroundMode === 'orbit' ? '#c4b5fd' : '#555',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', transition: 'all 0.15s',
+            }}
+          >
+            {playgroundMode === 'orbit' ? <Grid3X3 size={13} /> : <Circle size={13} />}
+          </button>
+
           <button
             onClick={() => setApiKeysOpen(true)}
             title="API Keys"

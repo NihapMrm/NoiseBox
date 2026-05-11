@@ -1,19 +1,31 @@
 import { Howl } from 'howler'
 
 const instances: Record<string, Howl> = {}
+// Track whether each instance was created with spatial audio (Web Audio API)
+const instanceSpatial: Record<string, boolean> = {}
 
-export function playSound(id: string, src: string, volume: number) {
+export function playSound(id: string, src: string, volume: number, spatialAudio = false) {
   if (instances[id]) {
-    instances[id].volume(volume / 100)
-    if (!instances[id].playing()) instances[id].play()
-    return
+    // If spatial mode doesn't match, tear down and recreate
+    if (instanceSpatial[id] !== spatialAudio) {
+      instances[id].stop()
+      instances[id].unload()
+      delete instances[id]
+      delete instanceSpatial[id]
+      // fall through to create new instance
+    } else {
+      instances[id].volume(volume / 100)
+      if (!instances[id].playing()) instances[id].play()
+      return
+    }
   }
+  instanceSpatial[id] = spatialAudio
   instances[id] = new Howl({
     src: [src],
     loop: true,
     volume: volume / 100,
     autoplay: true,
-    html5: true,
+    html5: !spatialAudio, // Web Audio API required for stereo panning
   })
 }
 
@@ -24,12 +36,23 @@ export function stopSound(id: string) {
       instances[id]?.stop()
       instances[id]?.unload()
       delete instances[id]
+      delete instanceSpatial[id]
     }, 650)
   }
 }
 
 export function setVolume(id: string, volume: number) {
   instances[id]?.volume(volume / 100)
+}
+
+// Stereo pan: -1 (full left) → 0 (center) → 1 (full right).
+// Only works when instance was created with spatialAudio=true (Web Audio API).
+export function setStereo(id: string, pan: number) {
+  try {
+    instances[id]?.stereo(Math.max(-1, Math.min(1, pan)))
+  } catch {
+    // Silently fail if not supported (html5 mode)
+  }
 }
 
 export function setMasterVolume(masterVol: number, sounds: Array<{ id: string; vol: number; active: boolean }>) {
