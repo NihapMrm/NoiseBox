@@ -3,6 +3,25 @@ import { useSettingsStore } from '../store/settingsStore'
 import { useSoundStore } from '../store/soundStore'
 import { useTimer } from '../hooks/useTimer'
 
+const GLASS: React.CSSProperties = {
+  position: 'absolute',
+  bottom: '16px',
+  left: '10%',
+  width: '80%',
+  height: '48px',
+  backgroundColor: 'rgba(16, 16, 16, 0.72)',
+  backdropFilter: 'blur(20px) saturate(160%)',
+  WebkitBackdropFilter: 'blur(20px) saturate(160%)',
+  border: '0.5px solid rgba(255, 255, 255, 0.07)',
+  borderRadius: '14px',
+  boxShadow: '0 4px 24px rgba(0,0,0,0.45), inset 0 0.5px 0 rgba(255,255,255,0.04)',
+  display: 'flex',
+  alignItems: 'center',
+  padding: '0 16px',
+  gap: '16px',
+  zIndex: 100,
+}
+
 export function BottomBar() {
   const masterVol = useSettingsStore((s) => s.masterVol)
   const setMasterVol = useSettingsStore((s) => s.setMasterVol)
@@ -10,26 +29,13 @@ export function BottomBar() {
   const timerMode = useSettingsStore((s) => s.timerMode)
   const sounds = useSoundStore((s) => s.sounds)
   const activeCount = sounds.filter((s) => s.active).length
-
   const { secondsLeft, pomPhase, formatTime } = useTimer()
 
   return (
-    <div
-      style={{
-        height: '48px',
-        backgroundColor: '#1e1e1e',
-        borderTop: '0.5px solid #2a2a2a',
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 16px',
-        gap: '16px',
-        zIndex: 100,
-        flexShrink: 0,
-      }}
-    >
+    <div style={GLASS}>
       {/* Master volume */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <Volume2 size={15} color="#555" />
+        <Volume2 size={14} color="#555" />
         <input
           type="range"
           min={0}
@@ -38,10 +44,10 @@ export function BottomBar() {
           onChange={(e) => setMasterVol(Number(e.target.value))}
           style={{ width: '80px', accentColor: '#7c6af7', cursor: 'pointer' }}
         />
-        <span style={{ fontSize: '12px', color: '#666', width: '32px' }}>{masterVol}%</span>
+        <span style={{ fontSize: '12px', color: '#666', width: '30px' }}>{masterVol}%</span>
       </div>
 
-      {/* Timer display */}
+      {/* Timer */}
       {timerMode !== 'off' && secondsLeft > 0 && (
         <div style={{ fontSize: '12px', color: '#7c6af7' }}>
           {timerMode === 'pomodoro' && (
@@ -53,7 +59,6 @@ export function BottomBar() {
         </div>
       )}
 
-      {/* Spacer */}
       <div style={{ flex: 1 }} />
 
       {/* Status */}

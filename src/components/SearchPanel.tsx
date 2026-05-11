@@ -172,15 +172,11 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
               onClick={() => { stopPreview(); onClose() }}
-              style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)', zIndex: 200 }}
+              style={{ position: 'absolute', inset: 0, backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(6px)', zIndex: 200 }}
             />
 
-            {/* Centered panel */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: -12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: -12 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
+            {/* Centering shell — static, not animated (Framer overwrites transform) */}
+            <div
               style={{
                 position: 'absolute',
                 top: '18%',
@@ -189,22 +185,28 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
                 width: '520px',
                 maxWidth: 'calc(100% - 48px)',
                 zIndex: 201,
-                display: 'flex',
-                flexDirection: 'column',
               }}
+            >
+            {/* Animated inner */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: -12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: -12 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              style={{ display: 'flex', flexDirection: 'column' }}
             >
               {/* Search input box */}
               <div
                 style={{
                   backgroundColor: '#1e1e1e',
                   border: '0.5px solid #444',
-                  borderRadius: results.length > 0 || isSearchMode ? '12px 12px 0 0' : '12px',
+                  borderBottom:'none',
+                  borderRadius: results.length > 0 || isSearchMode ? '12px 12px 0 0' : '12px 12px 0 0',
                   display: 'flex',
                   alignItems: 'center',
                   padding: '0 16px',
                   gap: '12px',
                   height: '56px',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
                 }}
               >
                 {searching
@@ -264,7 +266,6 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
                       borderTop: '0.5px solid #2a2a2a',
                       borderRadius: '0 0 12px 12px',
                       overflow: 'hidden',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
                     }}
                   >
                     {/* Section label */}
@@ -424,6 +425,7 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
                 )}
               </AnimatePresence>
             </motion.div>
+            </div>
           </>
         )}
       </AnimatePresence>

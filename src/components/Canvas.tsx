@@ -6,6 +6,11 @@ import { SoundCard } from './SoundCard'
 import { Bin } from './Bin'
 import { SearchPanel } from './SearchPanel'
 
+const BIN_WIDTH = 48
+const BIN_HEIGHT = 48
+const BIN_RIGHT = 16   // px from canvas right edge
+const BIN_BOTTOM = 80  // px from canvas bottom edge (clears floating BottomBar)
+
 export function Canvas() {
   const sounds = useSoundStore((s) => s.sounds)
   const updatePosition = useSoundStore((s) => s.updatePosition)
@@ -17,63 +22,63 @@ export function Canvas() {
 
   const canvasRef = useRef<HTMLDivElement>(null)
   const dragOffset = useRef({ x: 0, y: 0 })
-  const binRef = useRef<DOMRect | null>(null)
+
+  // Derive bin screen rect from canvas rect — avoids DOM query timing issues
+  function getBinRect() {
+    const canvas = canvasRef.current?.getBoundingClientRect()
+    if (!canvas) return null
+    return {
+      left:   canvas.right  - BIN_RIGHT  - BIN_WIDTH,
+      right:  canvas.right  - BIN_RIGHT,
+      top:    canvas.bottom - BIN_BOTTOM - BIN_HEIGHT,
+      bottom: canvas.bottom - BIN_BOTTOM,
+    }
+  }
 
   const handleDragStart = useCallback(
     (id: string, e: React.MouseEvent) => {
-      if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'BUTTON') return
+      if (
+        (e.target as HTMLElement).tagName === 'INPUT' ||
+        (e.target as HTMLElement).tagName === 'BUTTON'
+      ) return
       e.preventDefault()
 
       const sound = sounds.find((s) => s.id === id)
       if (!sound) return
 
       setDraggingId(id)
-
-      dragOffset.current = {
-        x: e.clientX - sound.x,
-        y: e.clientY - sound.y,
-      }
-
-      // Capture bin rect once drag starts
-      const binEl = document.querySelector('[data-bin="true"]') as HTMLElement | null
-      binRef.current = binEl?.getBoundingClientRect() ?? null
+      dragOffset.current = { x: e.clientX - sound.x, y: e.clientY - sound.y }
 
       const onMove = (me: MouseEvent) => {
         const canvas = canvasRef.current
         if (!canvas) return
-
         const rect = canvas.getBoundingClientRect()
+
         let x = me.clientX - dragOffset.current.x
         let y = me.clientY - dragOffset.current.y
-
-        x = Math.max(0, Math.min(x, rect.width - 165))
+        x = Math.max(0, Math.min(x, rect.width  - 165))
         y = Math.max(0, Math.min(y, rect.height - 160))
-
         updatePosition(id, x, y)
 
-        // Check over bin
-        if (binRef.current) {
+        const bin = getBinRect()
+        if (bin) {
           const over =
-            me.clientX >= binRef.current.left &&
-            me.clientX <= binRef.current.right &&
-            me.clientY >= binRef.current.top &&
-            me.clientY <= binRef.current.bottom
+            me.clientX >= bin.left  && me.clientX <= bin.right &&
+            me.clientY >= bin.top   && me.clientY <= bin.bottom
           setIsOverBin(over)
         }
       }
 
       const onUp = (me: MouseEvent) => {
-        if (binRef.current) {
+        const bin = getBinRect()
+        if (bin) {
           const over =
-            me.clientX >= binRef.current.left &&
-            me.clientX <= binRef.current.right &&
-            me.clientY >= binRef.current.top &&
-            me.clientY <= binRef.current.bottom
+            me.clientX >= bin.left  && me.clientX <= bin.right &&
+            me.clientY >= bin.top   && me.clientY <= bin.bottom
           if (over) removeSound(id)
         }
         setDraggingId(null)
         setIsOverBin(false)
-        binRef.current = null
         window.removeEventListener('mousemove', onMove)
         window.removeEventListener('mouseup', onUp)
       }
@@ -88,8 +93,8 @@ export function Canvas() {
     <div
       ref={canvasRef}
       style={{
-        flex: 1,
-        position: 'relative',
+        position: 'absolute',
+        inset: 0,
         backgroundColor: '#161616',
         backgroundImage:
           'linear-gradient(#222 1px, transparent 1px), linear-gradient(90deg, #222 1px, transparent 1px)',
@@ -115,7 +120,7 @@ export function Canvas() {
         onClick={() => setSearchOpen((v) => !v)}
         style={{
           position: 'absolute',
-          bottom: '60px',
+          bottom: '80px',
           left: '16px',
           width: '36px',
           height: '36px',
@@ -139,10 +144,7 @@ export function Canvas() {
       <Bin isActive={draggingId !== null} isOver={isOverBin} />
 
       <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
       `}</style>
     </div>
   )

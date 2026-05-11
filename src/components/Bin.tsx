@@ -18,7 +18,7 @@ export function Bin({ isActive, isOver }: BinProps) {
         transition={{ duration: 0.15 }}
         style={{
           position: 'absolute',
-          bottom: '60px',
+          bottom: '80px',
           right: '16px',
           width: '48px',
           height: '48px',

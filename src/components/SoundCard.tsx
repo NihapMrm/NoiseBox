@@ -29,14 +29,24 @@ export function SoundCard({ sound, onDragStart, isDragging, isOverBin }: SoundCa
 
   const isDownloading = dlStatus === 'downloading'
   const isError = dlStatus === 'error'
-  const opacity = isOverBin ? 0.4 : isDragging ? 0.85 : 1
+
+  const borderColor = isOverBin
+    ? '#e24b4a'
+    : isError
+    ? '#e24b4a'
+    : sound.active
+    ? '#7c6af7'
+    : '#2e2e2e'
+
+  const bgColor = isOverBin ? '#2a1515' : '#1e1e1e'
+  const opacity = isDragging && !isOverBin ? 0.85 : 1
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.92 }}
-      animate={{ opacity, scale: 1 }}
+      animate={{ opacity, scale: isOverBin ? 0.96 : 1 }}
       exit={{ opacity: 0, scale: 0.88 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.15 }}
       onMouseDown={(e) => onDragStart(sound.id, e)}
       style={{
         position: 'absolute',
@@ -44,12 +54,12 @@ export function SoundCard({ sound, onDragStart, isDragging, isOverBin }: SoundCa
         top: sound.y,
         width: '165px',
         borderRadius: '12px',
-        border: `0.5px solid ${isError ? '#e24b4a' : sound.active ? '#7c6af7' : '#2e2e2e'}`,
-        backgroundColor: '#1e1e1e',
+        border: `0.5px solid ${borderColor}`,
+        backgroundColor: bgColor,
         cursor: isDragging ? 'grabbing' : 'grab',
         userSelect: 'none',
         zIndex: isDragging ? 999 : 1,
-        transition: 'border-color 0.15s ease, opacity 0.15s ease',
+        transition: 'border-color 0.12s ease, background-color 0.12s ease',
         overflow: 'hidden',
       }}
     >

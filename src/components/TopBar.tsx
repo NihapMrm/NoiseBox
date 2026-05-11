@@ -6,6 +6,25 @@ import { PresetModal } from './PresetModal'
 import { TimerModal } from './TimerModal'
 import { ApiKeysModal } from './ApiKeysModal'
 
+const GLASS: React.CSSProperties = {
+  position: 'absolute',
+  top: '16px',
+  left: '10%',
+  width: '80%',
+  height: '48px',
+  backgroundColor: 'rgba(16, 16, 16, 0.72)',
+  backdropFilter: 'blur(20px) saturate(160%)',
+  WebkitBackdropFilter: 'blur(20px) saturate(160%)',
+  border: '0.5px solid rgba(255, 255, 255, 0.07)',
+  borderRadius: '14px',
+  boxShadow: '0 4px 24px rgba(0,0,0,0.45), inset 0 0.5px 0 rgba(255,255,255,0.04)',
+  display: 'flex',
+  alignItems: 'center',
+  padding: '0 16px',
+  gap: '12px',
+  zIndex: 100,
+}
+
 export function TopBar() {
   const [presetModalOpen, setPresetModalOpen] = useState(false)
   const [timerModalOpen, setTimerModalOpen] = useState(false)
@@ -23,19 +42,7 @@ export function TopBar() {
 
   return (
     <>
-      <div
-        style={{
-          height: '48px',
-          backgroundColor: '#1e1e1e',
-          borderBottom: '0.5px solid #2a2a2a',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 16px',
-          gap: '12px',
-          zIndex: 100,
-          flexShrink: 0,
-        }}
-      >
+      <div style={GLASS}>
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '7px', flexShrink: 0 }}>
           <Radio size={18} color="#7c6af7" />
@@ -43,7 +50,7 @@ export function TopBar() {
         </div>
 
         {/* Separator */}
-        <div style={{ width: '0.5px', height: '24px', backgroundColor: '#2a2a2a', flexShrink: 0 }} />
+        <div style={{ width: '0.5px', height: '20px', backgroundColor: 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
 
         {/* Preset pills */}
         <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', flex: 1, scrollbarWidth: 'none' }}>
@@ -54,16 +61,16 @@ export function TopBar() {
                 key={preset.id}
                 onClick={() => setActivePresetId(isActive ? null : preset.id)}
                 style={{
-                  padding: '4px 10px',
+                  padding: '3px 10px',
                   borderRadius: '6px',
-                  border: `0.5px solid ${isActive ? '#7c6af7' : '#333'}`,
-                  backgroundColor: isActive ? '#2d2540' : '#252525',
+                  border: `0.5px solid ${isActive ? '#7c6af7' : 'rgba(255,255,255,0.08)'}`,
+                  backgroundColor: isActive ? '#2d2540' : 'rgba(255,255,255,0.04)',
                   color: isActive ? '#c4b8ff' : '#888',
                   fontSize: '12px',
                   cursor: 'pointer',
                   flexShrink: 0,
                   whiteSpace: 'nowrap',
-                  transition: 'border-color 0.15s, background-color 0.15s, color 0.15s',
+                  transition: 'all 0.15s',
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) {
@@ -73,7 +80,7 @@ export function TopBar() {
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) {
-                    ;(e.currentTarget as HTMLButtonElement).style.borderColor = '#333'
+                    ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.08)'
                     ;(e.currentTarget as HTMLButtonElement).style.color = '#888'
                   }
                 }}
@@ -85,17 +92,14 @@ export function TopBar() {
           <button
             onClick={() => setPresetModalOpen(true)}
             style={{
-              padding: '4px 10px',
+              padding: '3px 10px',
               borderRadius: '6px',
-              border: '0.5px solid #333',
+              border: '0.5px solid rgba(255,255,255,0.08)',
               backgroundColor: 'transparent',
               color: '#888',
               fontSize: '12px',
               cursor: 'pointer',
               flexShrink: 0,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
             }}
           >
             + Save
@@ -103,78 +107,53 @@ export function TopBar() {
         </div>
 
         {/* Right controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-          {/* API keys button — red dot when no keys set */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
           <button
             onClick={() => setApiKeysOpen(true)}
             title="API Keys"
             style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              border: `0.5px solid ${noKeys ? '#e24b4a44' : '#2a2a2a'}`,
+              width: '30px', height: '30px', borderRadius: '8px',
+              border: `0.5px solid ${noKeys ? 'rgba(226,75,74,0.4)' : 'rgba(255,255,255,0.08)'}`,
               backgroundColor: 'transparent',
               color: noKeys ? '#e24b4a' : '#555',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              position: 'relative',
-              transition: 'all 0.15s',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', position: 'relative',
             }}
           >
-            <Key size={14} />
+            <Key size={13} />
             {noKeys && (
-              <div style={{
-                position: 'absolute',
-                top: '6px',
-                right: '6px',
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: '#e24b4a',
-              }} />
+              <div style={{ position: 'absolute', top: '5px', right: '5px', width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#e24b4a' }} />
             )}
           </button>
 
           <button
             onClick={() => setTimerModalOpen(true)}
             style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              border: `0.5px solid ${timerMode !== 'off' ? '#7c6af7' : '#2a2a2a'}`,
+              width: '30px', height: '30px', borderRadius: '8px',
+              border: `0.5px solid ${timerMode !== 'off' ? '#7c6af7' : 'rgba(255,255,255,0.08)'}`,
               backgroundColor: timerMode !== 'off' ? '#2d2540' : 'transparent',
               color: timerMode !== 'off' ? '#7c6af7' : '#555',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer',
-              transition: 'all 0.15s',
             }}
           >
-            <Clock size={16} />
+            <Clock size={15} />
           </button>
 
           <button
             onClick={() => setIsPlaying(!isPlaying)}
             style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
+              width: '30px', height: '30px', borderRadius: '8px',
               backgroundColor: '#7c6af7',
               border: 'none',
               color: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'background-color 0.15s',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', transition: 'background-color 0.15s',
             }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#6a58e0' }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#7c6af7' }}
           >
-            {isPlaying ? <Pause size={15} /> : <Play size={15} />}
+            {isPlaying ? <Pause size={14} /> : <Play size={14} />}
           </button>
         </div>
       </div>
