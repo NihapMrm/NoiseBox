@@ -10,25 +10,33 @@ import { savePreset, deletePreset, loadAllPresets } from '../lib/presets'
 interface PresetModalProps {
   open: boolean
   onClose: () => void
+  initialView?: 'save' | 'manage'
 }
 
-export function PresetModal({ open, onClose }: PresetModalProps) {
+export function PresetModal({ open, onClose, initialView = 'save' }: PresetModalProps) {
   const [name, setName] = useState('')
-  const [view, setView] = useState<'save' | 'manage'>('save')
+  const [view, setView] = useState<'save' | 'manage'>(initialView)
+
   const presets = usePresetStore((s) => s.presets)
+  const activePresetId = usePresetStore((s) => s.activePresetId)
   const setPresets = usePresetStore((s) => s.setPresets)
   const addPreset = usePresetStore((s) => s.addPreset)
   const removePreset = usePresetStore((s) => s.removePreset)
   const setActivePresetId = usePresetStore((s) => s.setActivePresetId)
+  const setSnapshot = usePresetStore((s) => s.setSnapshot)
+
   const sounds = useSoundStore((s) => s.sounds)
   const loadSounds = useSoundStore((s) => s.loadSounds)
   const masterVol = useSettingsStore((s) => s.masterVol)
 
+  // Reset view and name when modal opens
   useEffect(() => {
     if (open) {
+      setView(initialView)
+      setName('')
       loadAllPresets().then(setPresets)
     }
-  }, [open, setPresets])
+  }, [open, initialView, setPresets])
 
   async function handleSave() {
     if (!name.trim()) return
@@ -42,6 +50,7 @@ export function PresetModal({ open, onClose }: PresetModalProps) {
     await savePreset(preset)
     addPreset(preset)
     setActivePresetId(preset.id)
+    setSnapshot([...sounds])
     setName('')
     onClose()
   }
@@ -49,11 +58,16 @@ export function PresetModal({ open, onClose }: PresetModalProps) {
   async function handleDelete(id: string) {
     await deletePreset(id)
     removePreset(id)
+    if (id === activePresetId) {
+      setActivePresetId(null)
+      setSnapshot(null)
+    }
   }
 
   function handleLoad(preset: Preset) {
     loadSounds(preset.sounds)
     setActivePresetId(preset.id)
+    setSnapshot([...preset.sounds])
     onClose()
   }
 
@@ -162,7 +176,7 @@ export function PresetModal({ open, onClose }: PresetModalProps) {
                       style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0', borderBottom: '0.5px solid #222' }}
                     >
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '13px', color: '#d0d0d0' }}>{preset.name}</div>
+                        <div style={{ fontSize: '13px', color: preset.id === activePresetId ? '#c4b8ff' : '#d0d0d0' }}>{preset.name}</div>
                         <div style={{ fontSize: '11px', color: '#555' }}>{preset.sounds.length} sounds</div>
                       </div>
                       <button

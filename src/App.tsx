@@ -6,6 +6,7 @@ import { useAudio } from './hooks/useAudio'
 import { usePresetStore } from './store/presetStore'
 import { useSoundStore } from './store/soundStore'
 import { useSettingsStore } from './store/settingsStore'
+import { useDownloadedSoundsStore, DownloadedSound } from './store/downloadedSoundsStore'
 import { loadAllPresets } from './lib/presets'
 import { resolveBundledSrc } from './lib/audioDownloader'
 import { BUNDLED_SOUNDS } from './audio/sounds'
@@ -13,6 +14,7 @@ import { ActiveSound } from './types'
 import { LazyStore } from '@tauri-apps/plugin-store'
 
 const settingsStore = new LazyStore('settings.json')
+const downloadsStore = new LazyStore('downloads.json')
 
 // Cards start at y=88 to clear the floating TopBar (top:16 + height:48 + gap:24)
 const DEFAULT_POSITIONS: [number, number][] = [
@@ -28,15 +30,18 @@ export default function App() {
   const loadSounds = useSoundStore((s) => s.loadSounds)
   const setFreesoundApiKey = useSettingsStore((s) => s.setFreesoundApiKey)
   const setPixabayApiKey = useSettingsStore((s) => s.setPixabayApiKey)
+  const setAllDownloaded = useDownloadedSoundsStore((s) => s.setAll)
 
   useEffect(() => {
     async function init() {
-      const [fsKey, pbKey] = await Promise.all([
+      const [fsKey, pbKey, savedDownloads] = await Promise.all([
         settingsStore.get<string>('freesoundApiKey').catch(() => null),
         settingsStore.get<string>('pixabayApiKey').catch(() => null),
+        downloadsStore.get<DownloadedSound[]>('list').catch(() => null),
       ])
       if (fsKey) setFreesoundApiKey(fsKey)
       if (pbKey) setPixabayApiKey(pbKey)
+      if (savedDownloads?.length) setAllDownloaded(savedDownloads)
 
       loadAllPresets().then(setPresets).catch(() => {})
 
@@ -58,7 +63,7 @@ export default function App() {
       }
     }
     init()
-  }, [setPresets, loadSounds, setFreesoundApiKey, setPixabayApiKey])
+  }, [setPresets, loadSounds, setFreesoundApiKey, setPixabayApiKey, setAllDownloaded])
 
   return (
     <div
