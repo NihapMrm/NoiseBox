@@ -1,4 +1,8 @@
-use tauri::Manager;
+use tauri::{
+    menu::{Menu, MenuItem},
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+    Manager,
+};
 
 #[tauri::command]
 fn get_app_data_dir(app: tauri::AppHandle) -> String {
@@ -68,6 +72,57 @@ pub fn run() {
             fetch_text,
             download_file,
         ])
+        .setup(|app| {
+            let show = MenuItem::with_id(app, "show", "Show Noisebox", true, None::<&str>)?;
+            let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+            let menu = Menu::with_items(app, &[&show, &quit])?;
+
+            TrayIconBuilder::new()
+                .icon(app.default_window_icon().unwrap().clone())
+                .menu(&menu)
+                .tooltip("Noisebox")
+                .on_menu_event(|app, event| match event.id.as_ref() {
+                    "show" => {
+                        if let Some(win) = app.get_webview_window("main") {
+                            let _ = win.show();
+                            let _ = win.set_focus();
+                        }
+                    }
+                    "quit" => app.exit(0),
+                    _ => {}
+                })
+                .on_tray_icon_event(|tray, event| {
+                    if let TrayIconEvent::Click {
+                        button: MouseButton::Left,
+                        button_state: MouseButtonState::Up,
+                        ..
+                    } = event
+                    {
+                        let app = tray.app_handle();
+                        if let Some(win) = app.get_webview_window("main") {
+                            if win.is_visible().unwrap_or(false) {
+                                let _ = win.hide();
+                            } else {
+                                let _ = win.show();
+                                let _ = win.set_focus();
+                            }
+                        }
+                    }
+                })
+                .build(app)?;
+
+            // Hide to tray instead of closing
+            let win = app.get_webview_window("main").unwrap();
+            let win_clone = win.clone();
+            win.on_window_event(move |event| {
+                if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                    api.prevent_close();
+                    let _ = win_clone.hide();
+                }
+            });
+
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

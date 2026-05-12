@@ -56,12 +56,25 @@ export function OrbitCanvas() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
   const [presetModalOpen, setPresetModalOpen] = useState(false)
+  const [presetModalView, setPresetModalView] = useState<'save' | 'manage'>('save')
+  const [canvasSize, setCanvasSize] = useState({ w: 0, h: 0 })
 
   const canvasRef = useRef<HTMLDivElement>(null)
   const dragOffset = useRef({ x: 0, y: 0 })
   const mouseDownPos = useRef({ x: 0, y: 0 })
   const didDrag = useRef(false)
 
+
+  // Track canvas size for SVG lines
+  useEffect(() => {
+    const update = () => {
+      const rect = canvasRef.current?.getBoundingClientRect()
+      if (rect) setCanvasSize({ w: rect.width, h: rect.height })
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
 
   // Close context menu on outside click
   useEffect(() => {
@@ -180,13 +193,23 @@ export function OrbitCanvas() {
 
   async function handleSavePreset() {
     setContextMenu(null)
-    if (!activePresetId) { setPresetModalOpen(true); return }
+    if (!activePresetId) {
+      setPresetModalView('save')
+      setPresetModalOpen(true)
+      return
+    }
     const preset = presets.find((p) => p.id === activePresetId)
     if (!preset) return
     const updated: Preset = { ...preset, sounds: [...sounds], masterVol }
     await savePreset(updated)
     updatePreset(updated)
     setSnapshot([...sounds])
+  }
+
+  function handleManagePresets() {
+    setContextMenu(null)
+    setPresetModalView('manage')
+    setPresetModalOpen(true)
   }
 
   function handleClearPlayground() {
@@ -269,6 +292,71 @@ export function OrbitCanvas() {
           }}
         />
       ))}
+
+      {/* Bubble → center connector lines (active sounds only) */}
+      <svg
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          zIndex: 1,
+          overflow: 'visible',
+        }}
+      >
+        <defs>
+          <filter id="line-glow">
+            <feGaussianBlur stdDeviation="2.5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        <AnimatePresence>
+          {sounds.map((sound) => {
+            const bx = sound.x + BUBBLE_R
+            const by = sound.y + BUBBLE_R
+            const cx = canvasSize.w / 2
+            const cy = canvasSize.h / 2
+            const isDragging = draggingId === sound.id
+            const mx = (bx + cx) / 2
+            const my = (by + cy) / 2
+            const isActive = sound.active
+            return (
+              <motion.g key={sound.id}>
+                <motion.line
+                  x1={bx} y1={by}
+                  initial={{ x2: bx, y2: by, opacity: 0 }}
+                  animate={{
+                    x2: cx, y2: cy,
+                    opacity: isDragging ? 0.7 : isActive ? 0.45 : 0.15,
+                    strokeWidth: isDragging ? 1.2 : isActive ? 0.9 : 0.6,
+                  }}
+                  exit={{ x2: bx, y2: by, opacity: 0 }}
+                  transition={{ duration: 0.45, ease: 'easeOut' }}
+                  stroke="white"
+                  strokeDasharray={isDragging ? '4 7' : '3 8'}
+                  filter={isActive ? 'url(#line-glow)' : undefined}
+                />
+                {isDragging && (
+                  <text
+                    x={mx} y={my - 5}
+                    fill="white"
+                    fontSize="9"
+                    fontFamily="ui-sans-serif, system-ui, sans-serif"
+                    textAnchor="middle"
+                    opacity={0.72}
+                  >
+                    {sound.vol}%
+                  </text>
+                )}
+              </motion.g>
+            )
+          })}
+        </AnimatePresence>
+      </svg>
 
       {/* Center glow circle */}
       <div style={{
@@ -476,6 +564,14 @@ export function OrbitCanvas() {
           >
             Auto align
           </button>
+          <button
+            style={menuItemStyle}
+            onClick={handleManagePresets}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#242424' }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent' }}
+          >
+            Manage presets…
+          </button>
           <div style={{ height: '0.5px', backgroundColor: '#2a2a2a', margin: '4px 0' }} />
           <button
             style={{ ...menuItemStyle, color: '#e24b4a' }}
@@ -493,7 +589,7 @@ export function OrbitCanvas() {
       <PresetModal
         open={presetModalOpen}
         onClose={() => setPresetModalOpen(false)}
-        initialView="save"
+        initialView={presetModalView}
       />
     </div>
   )

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Trash2 } from 'lucide-react'
+import { X, Trash2, Pencil, Check } from 'lucide-react'
 import { usePresetStore } from '../store/presetStore'
 import { useSoundStore } from '../store/soundStore'
 import { useSettingsStore } from '../store/settingsStore'
@@ -16,12 +16,16 @@ interface PresetModalProps {
 export function PresetModal({ open, onClose, initialView = 'save' }: PresetModalProps) {
   const [name, setName] = useState('')
   const [view, setView] = useState<'save' | 'manage'>(initialView)
+  const [renamingId, setRenamingId] = useState<string | null>(null)
+  const [renameValue, setRenameValue] = useState('')
+  const renameInputRef = useRef<HTMLInputElement>(null)
 
   const presets = usePresetStore((s) => s.presets)
   const activePresetId = usePresetStore((s) => s.activePresetId)
   const setPresets = usePresetStore((s) => s.setPresets)
   const addPreset = usePresetStore((s) => s.addPreset)
   const removePreset = usePresetStore((s) => s.removePreset)
+  const updatePreset = usePresetStore((s) => s.updatePreset)
   const setActivePresetId = usePresetStore((s) => s.setActivePresetId)
   const setSnapshot = usePresetStore((s) => s.setSnapshot)
 
@@ -34,9 +38,29 @@ export function PresetModal({ open, onClose, initialView = 'save' }: PresetModal
     if (open) {
       setView(initialView)
       setName('')
+      setRenamingId(null)
       loadAllPresets().then(setPresets)
     }
   }, [open, initialView, setPresets])
+
+  useEffect(() => {
+    if (renamingId) renameInputRef.current?.focus()
+  }, [renamingId])
+
+  function startRename(preset: Preset) {
+    setRenamingId(preset.id)
+    setRenameValue(preset.name)
+  }
+
+  async function commitRename(preset: Preset) {
+    const trimmed = renameValue.trim()
+    if (trimmed && trimmed !== preset.name) {
+      const updated: Preset = { ...preset, name: trimmed }
+      await savePreset(updated)
+      updatePreset(updated)
+    }
+    setRenamingId(null)
+  }
 
   async function handleSave() {
     if (!name.trim()) return
@@ -170,39 +194,92 @@ export function PresetModal({ open, onClose, initialView = 'save' }: PresetModal
                 {presets.length === 0 ? (
                   <p style={{ color: '#444', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>No saved presets</p>
                 ) : (
-                  presets.map((preset) => (
+                  presets.map((preset) => {
+                    const isRenaming = renamingId === preset.id
+                    return (
                     <div
                       key={preset.id}
                       style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0', borderBottom: '0.5px solid #222' }}
                     >
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '13px', color: preset.id === activePresetId ? '#c4b8ff' : '#d0d0d0' }}>{preset.name}</div>
-                        <div style={{ fontSize: '11px', color: '#555' }}>{preset.sounds.length} sounds</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        {isRenaming ? (
+                          <input
+                            ref={renameInputRef}
+                            value={renameValue}
+                            onChange={(e) => setRenameValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') commitRename(preset)
+                              if (e.key === 'Escape') setRenamingId(null)
+                            }}
+                            onBlur={() => commitRename(preset)}
+                            style={{
+                              width: '100%',
+                              backgroundColor: '#2a2a2a',
+                              border: '0.5px solid #7c6af7',
+                              borderRadius: '5px',
+                              padding: '3px 7px',
+                              color: '#d0d0d0',
+                              fontSize: '13px',
+                              outline: 'none',
+                              boxSizing: 'border-box',
+                            }}
+                          />
+                        ) : (
+                          <div
+                            style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'text' }}
+                            onDoubleClick={() => startRename(preset)}
+                          >
+                            <span style={{ fontSize: '13px', color: preset.id === activePresetId ? '#c4b8ff' : '#d0d0d0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {preset.name}
+                            </span>
+                            <button
+                              onClick={() => startRename(preset)}
+                              title="Rename"
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666', padding: '2px', flexShrink: 0, display: 'flex' }}
+                              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#ccc' }}
+                              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#666' }}
+                            >
+                              <Pencil size={11} />
+                            </button>
+                          </div>
+                        )}
+                        <div style={{ fontSize: '11px', color: '#555', marginTop: '1px' }}>{preset.sounds.length} sounds</div>
                       </div>
-                      <button
-                        onClick={() => handleLoad(preset)}
-                        style={{
-                          fontSize: '12px',
-                          padding: '4px 10px',
-                          borderRadius: '6px',
-                          border: '0.5px solid #7c6af7',
-                          backgroundColor: 'transparent',
-                          color: '#7c6af7',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Load
-                      </button>
+                      {isRenaming ? (
+                        <button
+                          onMouseDown={(e) => { e.preventDefault(); commitRename(preset) }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7c6af7', padding: '4px', display: 'flex' }}
+                        >
+                          <Check size={14} />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleLoad(preset)}
+                          style={{
+                            fontSize: '12px',
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            border: '0.5px solid #7c6af7',
+                            backgroundColor: 'transparent',
+                            color: '#7c6af7',
+                            cursor: 'pointer',
+                            flexShrink: 0,
+                          }}
+                        >
+                          Load
+                        </button>
+                      )}
                       <button
                         onClick={() => handleDelete(preset.id)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#444', padding: '4px' }}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#444', padding: '4px', display: 'flex' }}
                         onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#e24b4a' }}
                         onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#444' }}
                       >
                         <Trash2 size={14} />
                       </button>
                     </div>
-                  ))
+                    )
+                  })
                 )}
               </div>
             )}
