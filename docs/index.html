@@ -281,6 +281,43 @@
     }
     .how-note a { color: var(--accent-text); }
 
+    /* ── Downloads ───────────────────────────────────── */
+    .downloads {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    .dl-card {
+      background: var(--bg-surface);
+      border: 0.5px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 28px 24px;
+      text-align: center;
+      transition: border-color 0.15s;
+    }
+    .dl-card:hover { border-color: var(--border-mid); }
+    .dl-os {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 17px;
+      font-weight: 600;
+      color: #e4e4e4;
+      margin-bottom: 20px;
+    }
+    .dl-os svg { color: var(--accent-text); }
+    .dl-links { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .dl-links .btn { width: 100%; justify-content: center; }
+    .dl-alt {
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .dl-alt:hover { color: var(--text-primary); }
+    .dl-card.is-detected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+
     /* ── Final CTA ───────────────────────────────────── */
     .final-cta { text-align: center; }
     .final-cta h2 {
@@ -316,6 +353,7 @@
       .hero p.tagline { font-size: 17px; }
       .shots-grid { grid-template-columns: 1fr; }
       .features { grid-template-columns: 1fr; }
+      .downloads { grid-template-columns: 1fr; }
       .how { padding: 28px 22px; }
       .nav-links a:not(.nav-github) { display: none; }
     }
@@ -348,17 +386,17 @@
         Layer rain, fire, ocean waves and more on a free-form canvas. Save the mix as a preset and let it run while you focus, relax, or sleep.
       </p>
       <div class="cta-row">
-        <a class="btn btn-primary" href="https://github.com/NihapMrm/NoiseBox/releases/latest/download/Noisebox-Setup.exe">
+        <a class="btn btn-primary js-primary-download" href="https://github.com/NihapMrm/NoiseBox/releases/latest">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download for Windows
+          <span class="js-primary-label">Download</span>
         </a>
-        <a class="btn btn-secondary" href="https://github.com/NihapMrm/NoiseBox" target="_blank" rel="noopener">
-          View source
+        <a class="btn btn-secondary" href="#download">
+          All platforms
         </a>
       </div>
       <p class="platform-note">
-        Windows 10/11 &middot; free &amp; open source &middot;
-        <a href="https://github.com/NihapMrm/NoiseBox/releases/latest">other downloads &amp; older versions</a>
+        Windows, macOS &amp; Linux &middot; free &amp; open source &middot;
+        <a href="https://github.com/NihapMrm/NoiseBox/releases/latest">all downloads &amp; older versions</a>
       </p>
     </div>
   </header>
@@ -443,14 +481,56 @@
     </div>
   </section>
 
+  <section class="block" id="download">
+    <div class="container">
+      <div class="section-head">
+        <h2>Download Noisebox</h2>
+        <p>Free and open source. Pick your platform — installers are published with every release.</p>
+      </div>
+      <div class="downloads">
+        <div class="dl-card">
+          <div class="dl-os">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5 10 4.5v7H3zM10 12.5v7L3 18.5V12.5zM11 4.3 21 3v8.5H11zM21 12.5V21l-10-1.3V12.5z"/></svg>
+            Windows
+          </div>
+          <div class="dl-links">
+            <a class="btn btn-primary dl-win-exe" href="https://github.com/NihapMrm/NoiseBox/releases/latest">Installer (.exe)</a>
+            <a class="dl-alt dl-win-msi" href="https://github.com/NihapMrm/NoiseBox/releases/latest">or .msi</a>
+          </div>
+        </div>
+        <div class="dl-card">
+          <div class="dl-os">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.3 1.2-2.5 1.3-2.6-.1 0-2.5-1-2.5-3.8zM14.1 5.8c.6-.8 1-1.9.9-3-.9 0-2 .6-2.7 1.4-.6.7-1.1 1.8-.9 2.9 1 .1 2-.5 2.7-1.3z"/></svg>
+            macOS
+          </div>
+          <div class="dl-links">
+            <a class="btn btn-primary dl-mac-arm" href="https://github.com/NihapMrm/NoiseBox/releases/latest">Apple Silicon (.dmg)</a>
+            <a class="dl-alt dl-mac-intel" href="https://github.com/NihapMrm/NoiseBox/releases/latest">Intel (.dmg)</a>
+          </div>
+        </div>
+        <div class="dl-card">
+          <div class="dl-os">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-2 0-3 1.7-3 3.5 0 1 .3 1.8.3 2.6 0 .9-.8 1.6-1.5 2.6C7 12 6 13.4 6 15c0 .6.1 1.1.3 1.6-.4.3-.7.8-.7 1.4 0 .5.2.9.2 1.3 0 .5-.6.8-.6 1.4 0 .9 1.3 1.3 2.8 1.3 1.3 0 2-.5 2.4-1h3.2c.4.5 1.1 1 2.4 1 1.5 0 2.8-.4 2.8-1.3 0-.6-.6-.9-.6-1.4 0-.4.2-.8.2-1.3 0-.6-.3-1.1-.7-1.4.2-.5.3-1 .3-1.6 0-1.6-1-3-1.8-4.3-.7-1-1.5-1.7-1.5-2.6 0-.8.3-1.6.3-2.6C15 3.7 14 2 12 2zm-1.2 4.2c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zm2.4 0c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9z"/></svg>
+            Linux
+          </div>
+          <div class="dl-links">
+            <a class="btn btn-primary dl-linux-appimage" href="https://github.com/NihapMrm/NoiseBox/releases/latest">AppImage</a>
+            <a class="dl-alt dl-linux-deb" href="https://github.com/NihapMrm/NoiseBox/releases/latest">or .deb</a>
+          </div>
+        </div>
+      </div>
+      <p class="how-note js-version-note">Loading the latest release…</p>
+    </div>
+  </section>
+
   <section class="block final-cta">
     <div class="container">
       <h2>Ready to tune out?</h2>
       <p>Download Noisebox and build your first mix in under a minute.</p>
       <div class="cta-row">
-        <a class="btn btn-primary" href="https://github.com/NihapMrm/NoiseBox/releases/latest/download/Noisebox-Setup.exe">
+        <a class="btn btn-primary js-primary-download" href="https://github.com/NihapMrm/NoiseBox/releases/latest">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download for Windows
+          <span class="js-primary-label">Download</span>
         </a>
       </div>
     </div>
@@ -469,6 +549,102 @@
       </div>
     </div>
   </footer>
+
+  <script>
+    // Wire the download buttons to the actual assets of the latest GitHub
+    // Release, so links survive version bumps with no manual edits. Falls back
+    // to the releases page if the API is unreachable or no release exists yet.
+    (function () {
+      var REPO = 'NihapMrm/NoiseBox';
+      var RELEASES = 'https://github.com/' + REPO + '/releases/latest';
+
+      // Match an asset by filename patterns (first match wins).
+      function pick(assets, patterns) {
+        for (var p = 0; p < patterns.length; p++) {
+          for (var a = 0; a < assets.length; a++) {
+            if (patterns[p].test(assets[a].name)) return assets[a].browser_download_url;
+          }
+        }
+        return null;
+      }
+
+      function setLink(sel, url) {
+        var el = document.querySelector(sel);
+        if (!el) return;
+        if (url) { el.href = url; }
+        else { el.href = RELEASES; }
+      }
+
+      function detectOS() {
+        var ua = navigator.userAgent;
+        if (/Win/i.test(ua)) return 'win';
+        if (/Mac/i.test(ua)) return 'mac';
+        if (/Linux|X11/i.test(ua)) return 'linux';
+        return 'win';
+      }
+
+      function applyPrimary(os, links) {
+        var label = 'Download';
+        var href = RELEASES;
+        if (os === 'win') { label = 'Download for Windows'; href = links.winExe || href; }
+        else if (os === 'mac') {
+          label = 'Download for macOS';
+          // Default to Apple Silicon; Intel users can use the alt link in the grid.
+          href = links.macArm || links.macIntel || href;
+        }
+        else if (os === 'linux') { label = 'Download for Linux'; href = links.linuxAppImage || href; }
+
+        var labels = document.querySelectorAll('.js-primary-label');
+        for (var i = 0; i < labels.length; i++) labels[i].textContent = label;
+        var btns = document.querySelectorAll('.js-primary-download');
+        for (var j = 0; j < btns.length; j++) btns[j].href = href;
+
+        // Highlight the matching platform card.
+        var map = { win: 0, mac: 1, linux: 2 };
+        var cards = document.querySelectorAll('.dl-card');
+        if (cards[map[os]]) cards[map[os]].classList.add('is-detected');
+      }
+
+      fetch('https://api.github.com/repos/' + REPO + '/releases/latest', {
+        headers: { 'Accept': 'application/vnd.github+json' }
+      })
+        .then(function (r) { if (!r.ok) throw new Error('no release'); return r.json(); })
+        .then(function (data) {
+          var assets = data.assets || [];
+          var links = {
+            winExe:        pick(assets, [/-setup\.exe$/i, /\.exe$/i]),
+            winMsi:        pick(assets, [/\.msi$/i]),
+            macArm:        pick(assets, [/aarch64.*\.dmg$/i, /arm64.*\.dmg$/i]),
+            macIntel:      pick(assets, [/x64.*\.dmg$/i, /x86_64.*\.dmg$/i, /\.dmg$/i]),
+            linuxAppImage: pick(assets, [/\.AppImage$/i]),
+            linuxDeb:      pick(assets, [/\.deb$/i])
+          };
+
+          setLink('.dl-win-exe', links.winExe);
+          setLink('.dl-win-msi', links.winMsi);
+          setLink('.dl-mac-arm', links.macArm);
+          setLink('.dl-mac-intel', links.macIntel);
+          setLink('.dl-linux-appimage', links.linuxAppImage);
+          setLink('.dl-linux-deb', links.linuxDeb);
+
+          applyPrimary(detectOS(), links);
+
+          var note = document.querySelector('.js-version-note');
+          if (note) {
+            note.innerHTML = 'Latest release: <a href="' + RELEASES + '">' +
+              (data.tag_name || 'latest') + '</a>';
+          }
+        })
+        .catch(function () {
+          // Leave all links pointing at the releases page (their default href).
+          applyPrimary(detectOS(), {});
+          var note = document.querySelector('.js-version-note');
+          if (note) {
+            note.innerHTML = '<a href="' + RELEASES + '">View all downloads on GitHub →</a>';
+          }
+        });
+    })();
+  </script>
 
 </body>
 </html>
