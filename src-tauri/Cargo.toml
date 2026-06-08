@@ -2,8 +2,9 @@
 name = "noisebox"
 version = "0.1.0"
 description = "Noisebox — Ambient Sound Mixer"
-authors = ["you"]
+authors = ["NihapMrm"]
 edition = "2021"
+license = "MIT"
 
 [lib]
 name = "noisebox_lib"

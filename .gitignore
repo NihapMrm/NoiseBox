@@ -24,3 +24,4 @@ src-tauri/WixTools
 *.njsproj
 *.sln
 *.sw?
+*CLAUDE.md
